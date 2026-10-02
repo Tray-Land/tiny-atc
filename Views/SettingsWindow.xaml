@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ex:WindowEx
+    x:Class="TinyAtc.Views.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ex="using:WinUIEx"
+    Title="Settings">
+
+    <!--  Mica for the long-lived window; the transient flyout uses acrylic like the shell's.  -->
+    <ex:WindowEx.SystemBackdrop>
+        <MicaBackdrop />
+    </ex:WindowEx.SystemBackdrop>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TitleBar x:Name="AppTitleBar" Title="Settings">
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="ms-appx:///Assets/StoreLogo.png" />
+            </TitleBar.IconSource>
+        </TitleBar>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Padding="24,8,24,24" Spacing="4">
+                <TextBlock
+                    Margin="0,0,0,8"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    Text="General" />
+
+                <!--  Settings card pattern without the Toolkit dependency  -->
+                <Grid
+                    Padding="16,12"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    ColumnSpacing="12"
+                    CornerRadius="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Start with Windows" />
+                        <TextBlock
+                            x:Name="StartupDescription"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            Text="Keep the tray icon ready after you sign in."
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ToggleSwitch
+                        x:Name="StartupToggle"
+                        Grid.Column="1"
+                        MinWidth="0"
+                        AutomationProperties.Name="Start with Windows"
+                        IsEnabled="False"
+                        OffContent=""
+                        OnContent=""
+                        Toggled="StartupToggle_Toggled" />
+                </Grid>
+
+                <TextBlock
+                    Margin="0,20,0,8"
+                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                    Text="About" />
+                <TextBlock x:Name="VersionText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</ex:WindowEx>

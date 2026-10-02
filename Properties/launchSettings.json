@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TinyAtc (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "TinyAtc (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

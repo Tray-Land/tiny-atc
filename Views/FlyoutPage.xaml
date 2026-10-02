@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="TinyAtc.Views.FlyoutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="Transparent">
+
+    <Grid Padding="16,12,12,16" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Header  -->
+        <Grid ColumnSpacing="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                x:Name="TitleText"
+                VerticalAlignment="Center"
+                Style="{StaticResource SubtitleTextBlockStyle}"
+                Text="Tiny Atc" />
+            <Button
+                x:Name="RefreshButton"
+                Grid.Column="1"
+                AutomationProperties.Name="Refresh"
+                Click="RefreshButton_Click"
+                Style="{StaticResource FlyoutIconButtonStyle}"
+                ToolTipService.ToolTip="Refresh">
+                <FontIcon FontSize="14" Glyph="&#xE72C;" />
+            </Button>
+            <Button
+                Grid.Column="2"
+                AutomationProperties.Name="Settings"
+                Click="SettingsButton_Click"
+                Style="{StaticResource FlyoutIconButtonStyle}"
+                ToolTipService.ToolTip="Settings">
+                <FontIcon FontSize="14" Glyph="&#xE713;" />
+            </Button>
+        </Grid>
+
+        <!--  Errors keep the last good content visible underneath  -->
+        <InfoBar
+            x:Name="StatusBar"
+            Grid.Row="1"
+            IsClosable="False"
+            IsOpen="False"
+            Severity="Warning" />
+
+        <!--  Content: replace with the app's own view  -->
+        <Border
+            Grid.Row="2"
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="8">
+            <StackPanel VerticalAlignment="Center" Spacing="4">
+                <TextBlock
+                    x:Name="ValueText"
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource TitleLargeTextBlockStyle}"
+                    Text="--" />
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="Replace this card with the app's content." />
+            </StackPanel>
+        </Border>
+
+        <!--  Footer  -->
+        <Grid Grid.Row="3">
+            <TextBlock
+                x:Name="UpdatedText"
+                VerticalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}" />
+            <ProgressRing
+                x:Name="LoadingRing"
+                Width="16"
+                Height="16"
+                HorizontalAlignment="Right"
+                IsActive="False" />
+        </Grid>
+    </Grid>
+</Page>
