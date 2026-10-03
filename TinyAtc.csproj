@@ -16,6 +16,8 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);CS0618</NoWarn>
+    <!-- The Core library, its tests and helper scripts live under the app folder but build on their own. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);TinyAtc.Core\**;TinyAtc.Tests\**;scripts\**</DefaultItemExcludes>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -29,9 +31,14 @@
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
     <Content Include="Assets\AppIcon-dark.ico" />
     <Content Remove="branding\**" />
+    <!-- OurAirports extract (public domain), rebuilt by scripts/BuildAirports.cs; loaded lazily by AirportService. -->
+    <Content Include="Assets\Data\airports.csv" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="TinyAtc.Core\TinyAtc.Core.csproj" />
   </ItemGroup>
   <!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
@@ -53,7 +60,9 @@
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="*" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="*" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="*" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.TokenizingTextBox" Version="8.2.251219" />
     <PackageReference Include="WinUIEx" Version="2.9.3" />
+    <PackageReference Include="WinUIEx.Maps" Version="1.0.0" />
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.335">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

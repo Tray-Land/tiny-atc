@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Secrets for Tiny Atc. This file is gitignored; OAuth.resw.sample is the committed template.
-  Paste the app's own API keys below; read them through Services/Secrets.cs.
+  Secrets for Tiny ATC. This file is gitignored; OAuth.resw.sample is the committed template.
+  Paste your Azure Maps subscription key into the AzureMapsKey value below.
 -->
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
@@ -37,8 +37,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ExampleApiKey" xml:space="preserve">
+  <data name="AzureMapsKey" xml:space="preserve">
     <value></value>
-    <comment>Example key read by Secrets.ExampleApiKey. Rename it, and add one data element per key.</comment>
+    <comment>Azure Maps subscription key (Azure portal > Azure Maps account > Authentication > Primary Key).</comment>
   </data>
 </root>
