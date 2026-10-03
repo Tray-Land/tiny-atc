@@ -24,8 +24,8 @@ namespace TinyAtc.Views;
 /// </summary>
 public sealed partial class TrayFlyoutWindow : WindowEx
 {
-    private const int PopupWidth = 360;
-    private const int PopupHeight = 480;
+    private const int PopupWidth = 420;
+    private const int PopupHeight = 600;
 
     private const int WS_EX_TOOLWINDOW = 0x00000080;
     private const int WS_EX_LAYERED = 0x00080000;
@@ -123,7 +123,8 @@ public sealed partial class TrayFlyoutWindow : WindowEx
         ShowPopup();
     }
 
-    public void ShowPopup()
+    /// <param name="focusIcao">An aircraft to select on the map, when opened from the tray menu.</param>
+    public void ShowPopup(string? focusIcao = null)
     {
         // Position before showing so the window never flashes at a stale location.
         WindowPlacementService.PositionNearTray(this, PopupWidth, PopupHeight);
@@ -142,6 +143,11 @@ public sealed partial class TrayFlyoutWindow : WindowEx
         this.Show();
         Activate();
         PInvoke.SetForegroundWindow(_hwnd);
+
+        if (focusIcao is not null)
+        {
+            _page.FocusPlane(focusIcao);
+        }
 
         _page.OnShown();
     }
@@ -363,6 +369,9 @@ public sealed partial class TrayFlyoutWindow : WindowEx
     private void Escape_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
         args.Handled = true;
-        HidePopup();
+        if (!_page.TryGoBack())
+        {
+            HidePopup();
+        }
     }
 }

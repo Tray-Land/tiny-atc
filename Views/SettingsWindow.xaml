@@ -4,6 +4,8 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ex="using:WinUIEx"
+    xmlns:local="using:TinyAtc.Views"
+    xmlns:tk="using:CommunityToolkit.WinUI.Controls"
     Title="Settings">
 
     <!--  Mica for the long-lived window; the transient flyout uses acrylic like the shell's.  -->
@@ -12,6 +14,32 @@
     </ex:WindowEx.SystemBackdrop>
 
     <Grid>
+        <Grid.Resources>
+            <DataTemplate x:Key="MessageTokenTemplate" x:DataType="local:MarqueeToken">
+                <TextBlock Text="{x:Bind Label}" />
+            </DataTemplate>
+            <Style x:Key="CardStyle" TargetType="Grid">
+                <Setter Property="Padding" Value="16,12" />
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="ColumnSpacing" Value="12" />
+                <Setter Property="CornerRadius" Value="4" />
+            </Style>
+            <Style
+                x:Key="SectionHeaderStyle"
+                BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+                TargetType="TextBlock">
+                <Setter Property="Margin" Value="0,20,0,8" />
+            </Style>
+            <Style
+                x:Key="CardCaptionStyle"
+                BasedOn="{StaticResource CaptionTextBlockStyle}"
+                TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -24,20 +52,258 @@
         </TitleBar>
 
         <ScrollViewer Grid.Row="1">
-            <StackPanel Padding="24,8,24,24" Spacing="4">
-                <TextBlock
-                    Margin="0,0,0,8"
-                    Style="{StaticResource BodyStrongTextBlockStyle}"
-                    Text="General" />
+            <StackPanel Padding="24,0,24,24" Spacing="4">
 
-                <!--  Settings card pattern without the Toolkit dependency  -->
-                <Grid
-                    Padding="16,12"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    ColumnSpacing="12"
-                    CornerRadius="4">
+                <!--  Location  -->
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Location" />
+                <Grid RowSpacing="8" Style="{StaticResource CardStyle}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Home" />
+                        <TextBlock Style="{StaticResource CardCaptionStyle}" Text="The map opens here, and the tray marquee lists the flights above it." />
+                    </StackPanel>
+                    <RadioButtons
+                        x:Name="LocationModeButtons"
+                        Grid.Row="1"
+                        AutomationProperties.Name="Home location"
+                        SelectionChanged="LocationModeButtons_SelectionChanged">
+                        <RadioButton Content="Use my device's location" />
+                        <RadioButton Content="Use my saved map view" />
+                    </RadioButtons>
+                    <Grid Grid.Row="2" ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            x:Name="LocationStatus"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource CardCaptionStyle}" />
+                        <Button
+                            x:Name="LocateButton"
+                            Grid.Column="1"
+                            Click="LocateButton_Click"
+                            Content="Update location" />
+                    </Grid>
+                </Grid>
+
+                <!--  Tray marquee  -->
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Tray icon" />
+                <Grid Style="{StaticResource CardStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Scroll flights overhead" />
+                        <TextBlock
+                            x:Name="MarqueeDescription"
+                            Style="{StaticResource CardCaptionStyle}"
+                            Text="Shows callsign, altitude and distance of nearby flights in the tray icon. Checks OpenSky in the background." />
+                    </StackPanel>
+                    <ToggleSwitch
+                        x:Name="MarqueeToggle"
+                        Grid.Column="1"
+                        MinWidth="0"
+                        AutomationProperties.Name="Scroll flights overhead"
+                        OffContent=""
+                        OnContent=""
+                        Toggled="MarqueeToggle_Toggled" />
+                </Grid>
+                <Grid Style="{StaticResource CardStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Overhead means within" />
+                        <TextBlock Style="{StaticResource CardCaptionStyle}" Text="Distance from home." />
+                    </StackPanel>
+                    <ComboBox
+                        x:Name="RadiusBox"
+                        Grid.Column="1"
+                        MinWidth="140"
+                        AutomationProperties.Name="Overhead radius"
+                        SelectionChanged="RadiusBox_SelectionChanged" />
+                </Grid>
+                <Grid RowSpacing="8" Style="{StaticResource CardStyle}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Message for each flight" />
+                            <TextBlock Style="{StaticResource CardCaptionStyle}" Text="Pick what to show, type your own text, and drag to reorder." />
+                        </StackPanel>
+                        <Button
+                            Grid.Column="1"
+                            Click="ResetMessage_Click"
+                            Content="Reset" />
+                    </Grid>
+                    <tk:TokenizingTextBox
+                        x:Name="MessageBox"
+                        Grid.Row="1"
+                        AllowDrop="True"
+                        AutomationProperties.Name="Marquee message"
+                        CanDragItems="True"
+                        PlaceholderText="Add a field or type text"
+                        SuggestedItemTemplate="{StaticResource MessageTokenTemplate}"
+                        TextChanged="MessageBox_TextChanged"
+                        TextMemberPath="Label"
+                        TokenItemAdding="MessageBox_TokenItemAdding"
+                        TokenItemTemplate="{StaticResource MessageTokenTemplate}" />
+                    <TextBlock
+                        x:Name="MessagePreview"
+                        Grid.Row="2"
+                        Style="{StaticResource CardCaptionStyle}" />
+                </Grid>
+                <Grid Style="{StaticResource CardStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Airline colors" />
+                        <TextBlock Style="{StaticResource CardCaptionStyle}" Text="Color each flight by its airline so they're easy to tell apart." />
+                    </StackPanel>
+                    <ToggleSwitch
+                        x:Name="AirlineColorsToggle"
+                        Grid.Column="1"
+                        MinWidth="0"
+                        AutomationProperties.Name="Airline colors"
+                        OffContent=""
+                        OnContent=""
+                        Toggled="AirlineColorsToggle_Toggled" />
+                </Grid>
+                <Grid Style="{StaticResource CardStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="Scroll speed" />
+                    <ComboBox
+                        x:Name="SpeedBox"
+                        Grid.Column="1"
+                        MinWidth="140"
+                        AutomationProperties.Name="Scroll speed"
+                        SelectionChanged="SpeedBox_SelectionChanged">
+                        <x:String>Slow</x:String>
+                        <x:String>Normal</x:String>
+                        <x:String>Fast</x:String>
+                    </ComboBox>
+                </Grid>
+                <Grid Style="{StaticResource CardStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center" Text="Units" />
+                    <ComboBox
+                        x:Name="UnitsBox"
+                        Grid.Column="1"
+                        MinWidth="140"
+                        AutomationProperties.Name="Units"
+                        SelectionChanged="UnitsBox_SelectionChanged">
+                        <x:String>Aviation (ft, kt, nm)</x:String>
+                        <x:String>Imperial (ft, mph, mi)</x:String>
+                        <x:String>Metric (m, km/h, km)</x:String>
+                    </ComboBox>
+                </Grid>
+
+                <!--  Favorite airports  -->
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Favorite airports" />
+                <Grid RowSpacing="8" Style="{StaticResource CardStyle}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Style="{StaticResource CardCaptionStyle}" Text="Pick one from the airplane button on the map to see its arrivals, departures and ground traffic." />
+                    <AutoSuggestBox
+                        x:Name="AirportSearch"
+                        Grid.Row="1"
+                        AutomationProperties.Name="Add an airport"
+                        PlaceholderText="Add an airport: code, name or city"
+                        QueryIcon="Add"
+                        QuerySubmitted="AirportSearch_QuerySubmitted"
+                        SuggestionChosen="AirportSearch_SuggestionChosen"
+                        TextChanged="AirportSearch_TextChanged" />
+                    <StackPanel x:Name="FavoritesPanel" Grid.Row="2" Spacing="2" />
+                </Grid>
+
+                <!--  OpenSky account  -->
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="OpenSky account" />
+                <Grid RowSpacing="10" Style="{StaticResource CardStyle}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock x:Name="AccountTitle" Text="Not signed in" />
+                        <TextBlock
+                            x:Name="AccountDescription"
+                            Style="{StaticResource CardCaptionStyle}"
+                            Text="Without an account OpenSky allows 400 requests a day. A free API client raises that to 4,000 and updates the map twice as often." />
+                    </StackPanel>
+                    <HyperlinkButton
+                        Grid.Row="1"
+                        Padding="0"
+                        Content="Create an API client on your OpenSky account page"
+                        NavigateUri="https://opensky-network.org/my-opensky/account" />
+                    <TextBox
+                        x:Name="ClientIdBox"
+                        Grid.Row="2"
+                        AutomationProperties.Name="Client ID"
+                        Header="Client ID"
+                        IsSpellCheckEnabled="False" />
+                    <PasswordBox
+                        x:Name="ClientSecretBox"
+                        Grid.Row="3"
+                        AutomationProperties.Name="Client secret"
+                        Header="Client secret" />
+                    <StackPanel
+                        Grid.Row="4"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <Button
+                            x:Name="SignInButton"
+                            Click="SignInButton_Click"
+                            Content="Save and verify"
+                            Style="{StaticResource AccentButtonStyle}" />
+                        <Button
+                            x:Name="SignOutButton"
+                            Click="SignOutButton_Click"
+                            Content="Remove" />
+                        <ProgressRing
+                            x:Name="SignInRing"
+                            Width="16"
+                            Height="16"
+                            IsActive="False" />
+                        <TextBlock
+                            x:Name="SignInError"
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+                </Grid>
+
+                <!--  General  -->
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="General" />
+                <Grid Style="{StaticResource CardStyle}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -46,10 +312,8 @@
                         <TextBlock Text="Start with Windows" />
                         <TextBlock
                             x:Name="StartupDescription"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Text="Keep the tray icon ready after you sign in."
-                            TextWrapping="Wrap" />
+                            Style="{StaticResource CardCaptionStyle}"
+                            Text="Keep the tray icon ready after you sign in." />
                     </StackPanel>
                     <ToggleSwitch
                         x:Name="StartupToggle"
@@ -62,11 +326,13 @@
                         Toggled="StartupToggle_Toggled" />
                 </Grid>
 
-                <TextBlock
-                    Margin="0,20,0,8"
-                    Style="{StaticResource BodyStrongTextBlockStyle}"
-                    Text="About" />
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="About" />
                 <TextBlock x:Name="VersionText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="Flight data: The OpenSky Network (opensky-network.org). Airports: OurAirports (public domain). Map: © OpenStreetMap contributors © CARTO."
+                    TextWrapping="Wrap" />
             </StackPanel>
         </ScrollViewer>
     </Grid>
