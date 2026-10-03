@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>TinyAtc.Tests</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSTest" Version="4.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TinyAtc.Core\TinyAtc.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The real bundled data, so catalog tests catch a bad rebuild. -->
+    <None Include="..\Assets\Data\airports.csv" Link="Data\airports.csv" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

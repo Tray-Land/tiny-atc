@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    UI-free code shared by the app and its tests: the OpenSky client and parser, geo math, the
+    airport catalog and traffic classification, and the tray marquee's text and pixels. Nothing
+    here may depend on WinUI or Windows APIs.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>TinyAtc</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsTrimmable>true</IsTrimmable>
+  </PropertyGroup>
+</Project>

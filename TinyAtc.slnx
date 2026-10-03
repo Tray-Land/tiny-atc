@@ -1,0 +1,13 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="TinyAtc.csproj">
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
+    <Deploy />
+  </Project>
+  <Project Path="TinyAtc.Core/TinyAtc.Core.csproj" />
+  <Project Path="TinyAtc.Tests/TinyAtc.Tests.csproj" />
+</Solution>
