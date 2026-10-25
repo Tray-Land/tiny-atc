@@ -40,7 +40,7 @@ To use an account, create an API client on your [OpenSky account page](https://o
 
 ## Install
 
-There's no release yet. Build from source (below), or package an MSIX with `build-msix-for-gh.ps1`. Sideloading a self-signed MSIX requires trusting its signing certificate first.
+There's no release yet. Build from source (below), or package with `build-msix-for-gh.ps1`. Releases provide one signed x64 + ARM64 MSIX bundle and a [TinyAtc.appinstaller feed](https://github.com/Tray-Land/tiny-atc/releases/latest/download/TinyAtc.appinstaller) (available after the first stable release). The feed installs the matching architecture and Windows App Runtime dependency, then checks for updates on launch and in the background. Sideloading a self-signed bundle requires trusting its signing certificate first.
 
 Requirements: Windows 10 1809 (build 17763) or later, x64 or ARM64.
 
@@ -70,7 +70,15 @@ dotnet test TinyAtc.Tests
 
 The first run opens the flyout. After that the app lives in the tray; look in the overflow (^) if the icon is hidden.
 
-`build-msix-for-gh.ps1` builds signed x64 and ARM64 MSIX packages and drafts a GitHub release. The airport list is regenerated from [OurAirports](https://ourairports.com/data/) with `dotnet run --file scripts/BuildAirports.cs`.
+`build-msix-for-gh.ps1` builds and verifies an x64 + ARM64 bundle, signs the bundle with the maintainer's `sign-msix` function, and drafts a GitHub release containing the bundle, App Installer feed and unchanged Microsoft framework packages. Each inner package embeds the same feed; release-only manifest changes are restored even if a build fails. Bump the manifest version for every release and publish the draft to make the stable update feed available. Differential updates need two published releases to verify.
+
+For an unsigned local packaging check without tagging or uploading:
+
+```powershell
+.\build-msix-for-gh.ps1 -SkipRelease -NoSign -OutputDirectory "$env:TEMP\TinyAtc-packages"
+```
+
+Windows App SDK components are pinned; update their versions explicitly when upgrading. The airport list is regenerated from [OurAirports](https://ourairports.com/data/) with `dotnet run --file scripts/BuildAirports.cs`.
 
 ## Project layout
 

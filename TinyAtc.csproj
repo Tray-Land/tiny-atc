@@ -33,6 +33,10 @@
     <Content Remove="branding\**" />
     <!-- OurAirports extract (public domain), rebuilt by scripts/BuildAirports.cs; loaded lazily by AirportService. -->
     <Content Include="Assets\Data\airports.csv" />
+    <Content Include="$(ReleaseAppInstallerPath)" Condition="'$(ReleaseAppInstallerPath)' != ''">
+      <Link>Update.appinstaller</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
