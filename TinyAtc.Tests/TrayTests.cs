@@ -48,10 +48,10 @@ public sealed class TrayTests
     }
 
     [TestMethod]
-    public void MarqueeFramesScrollTheStripRightToLeft()
+    public void MarqueePlaneLeadsTheDetailsRightToLeft()
     {
         // A 4-pixel strip with one lit column at x = 1.
-        const int size = 4;
+        const int size = 16;
         const int width = 4;
         byte[] coverage = new byte[width * size];
         for (int y = 0; y < size; y++)
@@ -60,13 +60,68 @@ public sealed class TrayTests
         }
 
         MarqueeStrip strip = new(coverage, width, size);
-        Assert.AreEqual(8, strip.FrameCount);
+        Assert.AreEqual(28, strip.FrameCount);
 
-        // Frame 0 is all lead-in; at frame 4 the strip's column 1 sits at icon x = 1; at frame 5 it's moved left to x = 0.
+        // The plane leads; the text follows after the 16-pixel plane and a 4-pixel gap.
+        Assert.IsTrue(HasInk(strip.RenderFrame(0, 0xFFFFFFFF), size));
         Assert.AreEqual(-1, LitColumn(strip.RenderFrame(0, 0xFFFFFFFF), size));
-        Assert.AreEqual(1, LitColumn(strip.RenderFrame(4, 0xFFFFFFFF), size));
-        Assert.AreEqual(0, LitColumn(strip.RenderFrame(5, 0xFFFFFFFF), size));
-        Assert.AreEqual(-1, LitColumn(strip.RenderFrame(7, 0xFFFFFFFF), size));
+        Assert.AreEqual(1, LitColumn(strip.RenderFrame(20, 0xFFFFFFFF), size));
+        Assert.AreEqual(0, LitColumn(strip.RenderFrame(21, 0xFFFFFFFF), size));
+    }
+
+    [TestMethod]
+    [DataRow(16)]
+    [DataRow(20)]
+    [DataRow(24)]
+    [DataRow(32)]
+    [DataRow(48)]
+    public void MarqueeLoopDoesNotFlashBlankAtTheBoundary(int size)
+    {
+        byte[] coverage = new byte[size * 4];
+        Array.Fill(coverage, (byte)255);
+        MarqueeStrip strip = new(coverage, 4, size);
+
+        for (int position = strip.FrameCount - size; position <= strip.FrameCount; position++)
+        {
+            Assert.IsTrue(HasInk(strip.RenderFrame(position, 0xFFFFFFFF), size), $"Blank frame at {position} for {size}px.");
+        }
+
+        CollectionAssert.AreEqual(strip.RenderFrame(0, 0xFFFFFFFF), strip.RenderFrame(strip.FrameCount, 0xFFFFFFFF));
+    }
+
+    [TestMethod]
+    public void MarqueeDetailsCanChangeWithoutInterruptingTheLeadingPlane()
+    {
+        const int size = 16;
+        MarqueeStrip previous = new(new byte[size * 11], 11, size);
+        MarqueeStrip next = new(new byte[size * 7], 7, size);
+        byte[] last = previous.RenderFrame(previous.FrameCount - 1, 0xFFFFFFFF);
+        byte[] first = next.RenderFrame(0, 0xFFFFFFFF);
+
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size - 1; x++)
+            {
+                Assert.AreEqual(PixelAt(last, size, x + 1, y), PixelAt(first, size, x, y));
+            }
+        }
+    }
+
+    [TestMethod]
+    public void MarqueePlaneUsesTheThemeColorAndDetailsKeepTheirAirlineColors()
+    {
+        const int size = 16;
+        byte[] coverage = new byte[size * 4];
+        Array.Fill(coverage, (byte)255);
+        MarqueeStrip strip = new(coverage, 4, size, [0xFFFF0000, 0xFFFF0000, 0xFF0000FF, 0xFF0000FF]);
+
+        foreach (uint color in new[] { 0xFFFFFFFFu, 0xFF1C1C1Cu })
+        {
+            Assert.AreEqual(color, PixelAt(strip.RenderFrame(0, color), size, 1, 8));
+            byte[] text = strip.RenderFrame(20, color);
+            Assert.AreEqual(0xFFFF0000u, PixelAt(text, size, 0, 8));
+            Assert.AreEqual(0xFF0000FFu, PixelAt(text, size, 2, 8));
+        }
     }
 
     [TestMethod]
@@ -138,6 +193,25 @@ public sealed class TrayTests
         }
 
         return -1;
+    }
+
+    private static uint PixelAt(byte[] ico, int size, int x, int y) =>
+        BinaryPrimitives.ReadUInt32LittleEndian(ico.AsSpan(IconEncoder.ImageOffset + 40 + (((size - 1 - y) * size + x) * 4)));
+
+    private static bool HasInk(byte[] ico, int size)
+    {
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                if ((PixelAt(ico, size, x, y) >> 24) != 0)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
 

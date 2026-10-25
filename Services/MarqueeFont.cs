@@ -16,7 +16,7 @@ internal static partial class MarqueeFont
     private const int Transparent = 1;
     private const int SemiboldWeight = 600; // Heavier strokes survive a 16-pixel icon better than regular.
 
-    /// <summary>Draws <paramref name="text"/> with its ink filling the icon height, cropped to the ink's width.</summary>
+    /// <summary>Draws <paramref name="text"/> at five-eighths of the icon height, cropped to the ink's width.</summary>
     /// <param name="segmentStarts">Character indexes where colored segments begin, or null.</param>
     /// <returns>Coverage rows (width × size) and each segment start's column in them, or null when nothing draws.</returns>
     public static (byte[] Coverage, int Width, int[] Columns)? Render(string text, int size, IReadOnlyList<int>? segmentStarts = null)
@@ -26,9 +26,8 @@ internal static partial class MarqueeFont
             return null;
         }
 
-        // Draw at a nominal size to measure the ink, then again scaled so the ink fills the height
-        // with a one-pixel margin. Same approach as tray-times' badge digits.
-        int target = Math.Max(4, size - 2);
+        // Measure the ink, then scale it down so more characters fit in each frame.
+        int target = Math.Max(4, size * 5 / 8);
         int em = size;
         for (int pass = 0; pass < 2; pass++)
         {

@@ -241,7 +241,7 @@ internal sealed class TrayMarquee : IDisposable
         }
     }
 
-    private void BeginPass()
+    private void BeginPass(int position = 0)
     {
         _segments = _pendingSegments;
         if (_segments.Count == 0 || !_enabled)
@@ -277,7 +277,7 @@ internal sealed class TrayMarquee : IDisposable
 
         _strip = new MarqueeStrip(rendered.Coverage, rendered.Width, size, colors);
         _step = Math.Max(1, size / 16); // Same apparent speed at every display scale.
-        _position = 0;
+        _position = position;
         if (!_frameTimer.IsRunning)
         {
             _frameTimer.Start();
@@ -294,7 +294,7 @@ internal sealed class TrayMarquee : IDisposable
 
         if (_position >= strip.FrameCount)
         {
-            BeginPass();
+            BeginPass(_position - strip.FrameCount);
             if (_strip is null)
             {
                 return;

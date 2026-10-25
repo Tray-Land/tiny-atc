@@ -1,18 +1,37 @@
 namespace TinyAtc.Tray;
 
 /// <summary>
-/// The marquee's text rendered once as a wide strip of coverage (0-255 per pixel), from which each
-/// animation frame is cut as a square window and encoded as an icon. Rendering the text once and
-/// only slicing per frame keeps each frame to a small copy plus an ICO header.
+/// A left-facing plane towing the marquee's text in a continuous loop. Coverage is composed once,
+/// so each animation frame only slices a square window and encodes it as an icon.
 /// </summary>
 public sealed class MarqueeStrip
 {
+    private static readonly string[] Plane =
+    [
+        "................",
+        "................",
+        "..........##....",
+        ".........###....",
+        "........###.....",
+        ".......###....#.",
+        "......###....##.",
+        "..############..",
+        ".############...",
+        "..############..",
+        "......###....##.",
+        ".......###....#.",
+        "........###.....",
+        ".........###....",
+        "..........##....",
+        "................",
+    ];
+
     private readonly byte[] _coverage;
     private readonly uint[] _pixels;
 
     private readonly uint[]? _columnColors;
 
-    /// <param name="coverage">Row-major, top-down coverage, <paramref name="width"/> × <paramref name="size"/>.</param>
+    /// <param name="coverage">Text coverage, row-major and top-down, <paramref name="width"/> × <paramref name="size"/>.</param>
     /// <param name="size">Icon width and height in pixels; the strip's height.</param>
     /// <param name="columnColors">Optional 0xAARRGGBB per column; 0 means the frame's default color.</param>
     public MarqueeStrip(byte[] coverage, int width, int size, uint[]? columnColors = null)
@@ -25,11 +44,23 @@ public sealed class MarqueeStrip
             ArgumentOutOfRangeException.ThrowIfNotEqual(columnColors.Length, width, nameof(columnColors));
         }
 
-        _columnColors = columnColors;
-        _coverage = coverage;
-        Width = width;
         Size = size;
+        int gap = Math.Max(1, size / 4);
+        int textStart = size + gap;
+        Width = textStart + width + gap;
+        _coverage = new byte[Width * size];
         _pixels = new uint[size * size];
+        DrawPlane();
+        for (int y = 0; y < size; y++)
+        {
+            Array.Copy(coverage, y * width, _coverage, (y * Width) + textStart, width);
+        }
+
+        if (columnColors is not null)
+        {
+            _columnColors = new uint[Width];
+            Array.Copy(columnColors, 0, _columnColors, textStart, width);
+        }
     }
 
     public int Width { get; }
@@ -37,10 +68,10 @@ public sealed class MarqueeStrip
     public int Size { get; }
 
     /// <summary>
-    /// Scroll positions in one pass: the text enters at the right edge and leaves at the left,
-    /// so a pass is the strip's width plus one icon of blank lead-in.
+    /// Scroll positions in one loop, including the plane and short gaps around the text.
+    /// The next plane enters while the previous details leave, without a blank lead-in.
     /// </summary>
-    public int FrameCount => Width + Size;
+    public int FrameCount => Width;
 
     /// <summary>
     /// Encodes the frame at scroll <paramref name="position"/> (0 to <see cref="FrameCount"/>-1)
@@ -49,21 +80,48 @@ public sealed class MarqueeStrip
     /// </summary>
     public byte[] RenderFrame(int position, uint color)
     {
-        int offset = position - Size; // Column of the strip under the icon's left edge.
+        ArgumentOutOfRangeException.ThrowIfNegative(position);
+        int offset = position % Width;
         for (int y = 0; y < Size; y++)
         {
             for (int x = 0; x < Size; x++)
             {
-                int column = offset + x;
-                bool inside = column >= 0 && column < Width;
-                byte c = inside ? _coverage[(y * Width) + column] : (byte)0;
-                uint own = inside && _columnColors is not null ? _columnColors[column] : 0;
+                int column = (offset + x) % Width;
+                byte c = _coverage[(y * Width) + column];
+                uint own = _columnColors is not null ? _columnColors[column] : 0;
                 uint pixel = own != 0 ? own : color;
                 _pixels[(y * Size) + x] = (((uint)(c * (pixel >> 24) / 255)) << 24) | (pixel & 0x00FFFFFF);
             }
         }
 
         return IconEncoder.Encode(_pixels, Size);
+    }
+
+    private void DrawPlane()
+    {
+        // Supersample the small silhouette so fractional display scales keep smooth edges.
+        const int samples = 4;
+        for (int y = 0; y < Size; y++)
+        {
+            for (int x = 0; x < Size; x++)
+            {
+                int covered = 0;
+                for (int sy = 0; sy < samples; sy++)
+                {
+                    int py = ((y * samples * 2) + (sy * 2) + 1) * Plane.Length / (Size * samples * 2);
+                    for (int sx = 0; sx < samples; sx++)
+                    {
+                        int px = ((x * samples * 2) + (sx * 2) + 1) * Plane[py].Length / (Size * samples * 2);
+                        if (Plane[py][px] == '#')
+                        {
+                            covered++;
+                        }
+                    }
+                }
+
+                _coverage[(y * Width) + x] = (byte)(covered * 255 / (samples * samples));
+            }
+        }
     }
 
     /// <summary>
