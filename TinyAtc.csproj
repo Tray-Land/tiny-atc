@@ -57,13 +57,14 @@
     <PropertyGroup> above to opt out.
   -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="*" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="*" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="*" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="0.7.1" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinUIAnalyzer" Version="0.7.1" PrivateAssets="all" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.TokenizingTextBox" Version="8.2.251219" />
     <PackageReference Include="WinUIEx" Version="2.9.3" />
-    <PackageReference Include="WinUIEx.Maps" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.335">
+    <PackageReference Include="WinUIEx.Maps" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.367">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
