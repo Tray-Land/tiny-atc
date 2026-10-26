@@ -584,7 +584,7 @@ public sealed partial class FlyoutPage : Page, IDisposable
             return;
         }
 
-        Geopath outline = new(
+        Geopath outline = new((BasicGeoposition[])
         [
             new BasicGeoposition { Latitude = box.MinLatitude, Longitude = box.MinLongitude },
             new BasicGeoposition { Latitude = box.MaxLatitude, Longitude = box.MinLongitude },

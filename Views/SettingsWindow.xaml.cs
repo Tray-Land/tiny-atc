@@ -146,13 +146,13 @@ public sealed partial class SettingsWindow : WindowEx
             return;
         }
 
-        SettingsService.MarqueeTokens = [.. _messageTokens.Select(t => t.Value)];
+        SettingsService.MarqueeTokens = (string[])[.. _messageTokens.Select(t => t.Value)];
         UpdateMessagePreview();
     }
 
     private void UpdateMessagePreview()
     {
-        string text = Overhead.Describe(SampleFlight, SettingsService.Units, [.. _messageTokens.Select(t => t.Value)]);
+        string text = Overhead.Describe(SampleFlight, SettingsService.Units, (string[])[.. _messageTokens.Select(t => t.Value)]);
         MessagePreview.Text = _messageTokens.Count == 0 ? $"Empty: shows the default. Example: {text}" : $"Example: {text}";
     }
 
@@ -265,7 +265,7 @@ public sealed partial class SettingsWindow : WindowEx
 
     private void AddFavorite(Airport airport)
     {
-        SettingsService.FavoriteAirports = [.. SettingsService.FavoriteAirports, airport.Icao];
+        SettingsService.FavoriteAirports = (string[])[.. SettingsService.FavoriteAirports, airport.Icao];
         AirportSearch.Text = "";
         AirportSearch.ItemsSource = null;
     }

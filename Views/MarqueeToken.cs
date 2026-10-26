@@ -8,5 +8,5 @@ public sealed record MarqueeToken(string Value, string Label)
     public static MarqueeToken FromValue(string value) => new(value, MarqueeTemplate.DisplayText(value));
 
     public static IReadOnlyList<MarqueeToken> AllFields() =>
-        [.. Enum.GetValues<MarqueeField>().Select(f => new MarqueeToken(MarqueeTemplate.Token(f), MarqueeTemplate.Label(f)))];
+        (MarqueeToken[])[.. Enum.GetValues<MarqueeField>().Select(f => new MarqueeToken(MarqueeTemplate.Token(f), MarqueeTemplate.Label(f)))];
 }

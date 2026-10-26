@@ -272,7 +272,7 @@ internal sealed class TrayMarquee : IDisposable
             colors = MarqueeStrip.ColumnColors(
                 rendered.Width,
                 rendered.Columns,
-                [.. _segments.Select(s => s.Color is { } c ? AirlineColors.ForBackground(c, light) : (uint?)null)]);
+                (uint?[])[.. _segments.Select(s => s.Color is { } c ? AirlineColors.ForBackground(c, light) : (uint?)null)]);
         }
 
         _strip = new MarqueeStrip(rendered.Coverage, rendered.Width, size, colors);
