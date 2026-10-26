@@ -38,12 +38,7 @@ internal static class WindowPlacementService
         try
         {
             FieldInfo? field = typeof(TrayIcon).GetField("_windowHandle", BindingFlags.Instance | BindingFlags.NonPublic);
-            _trayIconWindowHandle = field?.GetValue(trayIcon) switch
-            {
-                nint handle => handle,
-                object boxed => ReadHandle(boxed),
-                _ => 0,
-            };
+            _trayIconWindowHandle = field?.GetValue(trayIcon) is nint handle ? handle : 0;
         }
         catch
         {
@@ -152,15 +147,4 @@ internal static class WindowPlacementService
     }
 
     private static int ToPhysical(int logical, uint dpi) => (int)Math.Ceiling(logical * dpi / 96.0);
-
-    private static nint ReadHandle(object boxed)
-    {
-        // WinUIEx stores its own CsWin32 HWND struct; read its single pointer-sized field.
-        FieldInfo? valueField = boxed.GetType().GetField("Value", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        return valueField?.GetValue(boxed) switch
-        {
-            nint n => n,
-            _ => 0,
-        };
-    }
 }
